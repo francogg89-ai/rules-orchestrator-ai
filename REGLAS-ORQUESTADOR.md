@@ -248,6 +248,45 @@ R-7-no-consulta-git      el orquestador no consulta Git para reconstruir, comple
                          next_prompt
 ```
 
+## 7.1. Reanudación de `human_need`
+
+Cuando un sobre válido llega con `human_need != null`, el ORQUESTADOR conserva ese sobre
+íntegro como parte de su estado efímero y muestra la necesidad al HUMANO.
+
+Si después recibe una resolución humana para esa necesidad, no solicita al HUMANO un
+`turn_id`, no lo deriva de Git y no inventa un `next_prompt`.
+
+Toma mecánicamente del sobre detenido:
+
+```text
+resume_actor = human_need.resume_actor
+incoming_turn_id = turn_id
+```
+
+y entrega a la misma instancia `current` del `resume_actor` dos entradas separadas:
+
+```text
+RESUME_CONTEXT:
+INCOMING_TURN_ID=<turn_id exacto del sobre detenido>
+
+HUMAN_RESOLUTION_LITERAL:
+<resolución humana recibida sin reescribir>
+```
+
+La forma concreta del adaptador puede variar, pero debe conservar inequívocamente la separación
+entre metadata de reanudación y resolución humana literal.
+
+```text
+R-7.1-sobre              la reanudacion usa exactamente el sobre detenido que origino human_need
+R-7.1-turn               INCOMING_TURN_ID es copia exacta de turn_id de ese sobre
+R-7.1-no-humano-turn     el HUMANO no proporciona ni corrige INCOMING_TURN_ID
+R-7.1-no-incrementa      el ORQUESTADOR no incrementa turn_id; el resume_actor emite el sucesor
+R-7.1-no-git             no consulta Git para reconstruir metadata de reanudacion
+R-7.1-literal            la resolucion humana se entrega literalmente y separada de la metadata
+R-7.1-current            resume_actor debe poder satisfacerse como la misma instancia current;
+                         si se perdio, se aplica 6.1 y se detiene
+```
+
 Nota. El ciclo completo:
 
 ```text
@@ -376,7 +415,8 @@ equivalente inequívoca al par de entradas diferenciadas es admisible.
 ```text
 R-10-estado-admitido     el estado efimero del orquestador es exactamente: handle de instancia
                          current de AUDITOR, handle de instancia current de CONSTRUCTOR, ultimo
-                         turn_id transportado, ultimo sobre pendiente y stop_requested
+                         turn_id transportado, ultimo sobre pendiente o sobre detenido por
+                         human_need, y stop_requested
 R-10-handle-opaco        cada handle current puede encapsular solo la metadata tecnica necesaria
                          para recuperar exactamente esa instancia mediante su adaptador
 R-10-persistencia-local  el estado efimero admitido puede serializarse fuera de Git para sobrevivir
