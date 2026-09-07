@@ -167,11 +167,18 @@ Nota. El contador pertenece al trabajo, no al actor que lo ocupa.
 # 6. `next_instance`
 
 ```text
-R-6-current              current usa la instancia actualmente activa de next_actor
+R-6-current              current usa la unica instancia actualmente activa de next_actor
 R-6-fresh                fresh abre una instancia nueva de next_actor
 R-6-null                 null significa que no existe actor siguiente
 R-6-fresh-a-current      una instancia abierta como fresh pasa a ser la current de su rol solo
                          cuando el adaptador confirma la entrega de su primer prompt
+R-6-current-unico        existe como maximo un handle current elegible por rol
+R-6-reemplazo            al confirmar la primera entrega a una instancia fresh, su handle
+                         reemplaza atomicamente al handle current anterior de ese rol
+R-6-retira-anterior      desde ese reemplazo el handle anterior queda retirado y no puede volver
+                         a ser seleccionado por ningun pase current posterior
+R-6-cierre-opcional      cerrar fisicamente la ventana o sesion anterior es opcional; impedir su
+                         reutilizacion es obligatorio
 R-6-solo-next-instance   la eleccion de instancia lee next_instance y ningun otro campo
 R-6-handle-efimero       el handle de instancia puede contener la metadata tecnica necesaria
                          para reencontrar exactamente esa instancia; no es estado autoritativo
