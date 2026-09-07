@@ -206,8 +206,14 @@ y quien decide un relevo es un actor del método, no el transporte.
 R-6.2-frontera           cada runtime se accede mediante un adaptador mecanico; las reglas del
                          orquestador no dependen de una interfaz concreta de ChatGPT, Claude,
                          terminal, navegador, API ni proveedor
-R-6.2-fresh              el adaptador puede abrir una instancia nueva y devolver un handle que
-                         permita identificarla como la instancia abierta
+R-6.2-fresh              ante fresh el adaptador debe abrir una instancia nueva y devolver un
+                         handle que permita identificarla como la instancia abierta
+R-6.2-fresh-distinta     el handle obtenido para fresh debe ser distinto de cualquier handle
+                         existente del mismo rol; reutilizar la instancia current no satisface
+                         fresh aunque el prompt entregado sea correcto
+R-6.2-fresh-preflight    antes de entregar el primer prompt a fresh, el adaptador debe poder
+                         comprobar mecanicamente que la instancia destino es distinta de la
+                         current anterior; si no puede, detiene y reporta
 R-6.2-current            el adaptador puede reencontrar una instancia current unicamente cuando
                          puede identificar que es exactamente la misma instancia
 R-6.2-envia              el adaptador recibe un string ya resuelto por el orquestador y lo entrega
@@ -221,6 +227,11 @@ R-6.2-reanuda            un mecanismo nativo de reanudacion del runtime solo pue
 R-6.2-no-inventa         si el adaptador no puede demostrar continuidad con la misma instancia
                          current, reporta perdida de instancia y se aplica 6.1
 ```
+
+Nota. En un runtime conversacional, una instancia `fresh` significa una conversación o sesión
+nueva, no una nueva intervención dentro de la conversación current. En un runtime de terminal,
+significa una sesión nueva identificable por un handle distinto. La interfaz concreta puede variar;
+la propiedad exigida es que la identidad de instancia sea nueva y mecánicamente distinguible.
 
 Nota. El handle es opaco para las reglas. Una implementación concreta puede necesitar, por
 ejemplo, identificadores de navegador, pestaña, conversación, proceso, sesión, terminal o
