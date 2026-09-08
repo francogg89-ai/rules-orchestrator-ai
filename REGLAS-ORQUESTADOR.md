@@ -47,22 +47,34 @@ PASES INTERNOS DEL LOOP        todas las veces siguientes, siempre desde un sobr
 ## 1.1. Arranque externo
 
 ```text
-R-1.1-recibe-paquete     el orquestador recibe el paquete de constitucion aprobado
-R-1.1-abre-auditor       abre una instancia inicial de AUDITOR
-R-1.1-entrega-paquete    le entrega ese paquete literalmente
-R-1.1-integridad         antes del envio del paquete inicial aplica las mismas garantias de
-                         integridad del adaptador que a cualquier otra entrega; si existe readback
-                         mecanico se verifica, y si no existe no se inventa un canal auxiliar para
-                         demostrarlo
-R-1.1-entra-al-loop      recibe su salida y entra en el loop ordinario
-R-1.1-no-interpreta      no valida el contenido metodologico del paquete, no lo completa, no lo
-                         resume y no lo reescribe
-R-1.1-primer-turn-id     el primer sobre producido en el arranque externo lleva turn_id igual a 1
+R-1.1-recibe-init        el orquestador recibe un locator de arranque conforme a auditor-init/v1
+R-1.1-abre-auditor      abre una instancia inicial nueva de AUDITOR
+R-1.1-forma             el locator se transporta como una unica linea ASCII:
+                         AUDITOR_INIT_V1|WORK_ID=<id>|CARRIL=<carril>|CONSTITUTION_REPO=<owner/repo>|
+                         CONSTITUTION_PATH=<path-relativo>|CONSTITUTION_SHA=<sha40>
+R-1.1-canonica          para parsear el locator se permite ignorar un unico U+FEFF inicial y
+                         espacios ASCII exteriores al string completo; no se permite ninguna otra
+                         reescritura, inferencia ni normalizacion
+R-1.1-valida            valida mecanicamente protocolo, WORK_ID, CARRIL, repo owner/repo, path
+                         relativo no vacio y CONSTITUTION_SHA hexadecimal de 40 caracteres
+R-1.1-sin-url           CONSTITUTION_REPO usa slug owner/repo, no una URL completa; el AUDITOR
+                         reconstruye la localizacion Git desde esas coordenadas
+R-1.1-entrega-init      entrega al AUDITOR el locator canonico validado; no transporta la
+                         constitucion completa por la GUI
+R-1.1-git               la constitucion compleja vive en Git y queda identificada exclusivamente
+                         por CONSTITUTION_REPO, CONSTITUTION_PATH y CONSTITUTION_SHA
+R-1.1-entra-al-loop     recibe la salida del AUDITOR y entra en el loop ordinario
+R-1.1-no-interpreta     no valida el contenido metodologico de la constitucion, no la completa,
+                         resume ni reescribe
+R-1.1-primer-turn-id    el primer sobre producido en el arranque externo lleva turn_id igual a 1
 ```
 
-Nota. El primer AUDITOR no llega desde un sobre anterior. La forma del paquete es autoridad de
-`metodo-manifiestos-ai : METODO-MANIFIESTOS.md`. Un primer sobre con un `turn_id` distinto de `1`
-es inválido y se trata conforme a `4`.
+Nota. El locator inicial es deliberadamente distinto de `next_prompt`. Su objetivo es sobrevivir
+interfaces que puedan autolinkear URLs, insertar BOM o alterar presentacion. La semantica completa
+del trabajo no viaja por la GUI: viaja por Git.
+
+Nota. Los pases internos del loop mantienen su contrato de literalidad e integridad. La tolerancia
+canonica de `auditor-init/v1` no se aplica a `next_prompt`.
 
 ---
 
