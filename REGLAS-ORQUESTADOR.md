@@ -50,6 +50,10 @@ PASES INTERNOS DEL LOOP        todas las veces siguientes, siempre desde un sobr
 R-1.1-recibe-paquete     el orquestador recibe el paquete de constitucion aprobado
 R-1.1-abre-auditor       abre una instancia inicial de AUDITOR
 R-1.1-entrega-paquete    le entrega ese paquete literalmente
+R-1.1-integridad         antes del envio del paquete inicial aplica las mismas garantias de
+                         integridad del adaptador que a cualquier otra entrega: el valor preparado
+                         y, cuando la interfaz pueda transformarlo, el valor leido de vuelta en
+                         destino deben coincidir exactamente con el string fuente
 R-1.1-entra-al-loop      recibe su salida y entra en el loop ordinario
 R-1.1-no-interpreta      no valida el contenido metodologico del paquete, no lo completa, no lo
                          resume y no lo reescribe
@@ -218,6 +222,14 @@ R-6.2-current            el adaptador puede reencontrar una instancia current un
                          puede identificar que es exactamente la misma instancia
 R-6.2-envia              el adaptador recibe un string ya resuelto por el orquestador y lo entrega
                          sin resumirlo, reescribirlo, completarlo ni regenerarlo
+R-6.2-verifica-destino   si la interfaz de destino puede transformar el texto durante su insercion,
+                         el adaptador debe leer de vuelta el valor efectivamente preparado en esa
+                         interfaz antes de ejecutar la accion final de envio y comprobar que
+                         longitud UTF-8 y SHA-256 coinciden con el string fuente
+R-6.2-no-puede-verificar si el adaptador no puede demostrar esa igualdad antes del envio, no envia
+                         y reporta falla de integridad; no degrada a una entrega aproximada
+R-6.2-sin-artefactos     la insercion no puede crear adjuntos, archivos, uploads ni otros artefactos
+                         laterales que no formen parte del string fuente; si aparecen, no envia
 R-6.2-espera             el adaptador no entrega una salida al extractor mientras el actor siga
                          generando una respuesta
 R-6.2-recibe             cuando la respuesta termino, el adaptador devuelve la salida completa
